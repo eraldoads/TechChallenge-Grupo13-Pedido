@@ -5,7 +5,10 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RABBIT_HOSTNAME": "localhost",
+        "RABBIT_USERNAME": "guest",
+        "RABBIT_PASSWORD": "guest"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5008"

@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces;
+using Application.Services;
 using Data.Context;
+using Data.Messaging;
 using Data.Repository;
 using Domain.Interfaces;
 using Domain.ValueObjects;
@@ -41,6 +43,11 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<IPedidoMessageQueue, PedidoMessageQueue>();
+builder.Services.AddScoped<IPedidoMessageSender, PedidoMessageSender>();
+builder.Services.AddScoped<IPedidoMessageService, PedidoMessageService>();
+builder.Services.AddHostedService<PedidoWorkerService>();
+builder.Services.AddScoped<IPedidoScopedService, PedidoScopedService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
