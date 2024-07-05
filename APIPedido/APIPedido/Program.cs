@@ -44,6 +44,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 builder.Services.AddScoped<IPedidoMessageQueue, PedidoMessageQueue>();
+builder.Services.AddScoped<IPedidoMessageQueueError, PedidoMessageQueueError>();
 builder.Services.AddScoped<IPedidoMessageSender, PedidoMessageSender>();
 builder.Services.AddScoped<IPedidoMessageService, PedidoMessageService>();
 builder.Services.AddHostedService<PedidoWorkerService>();

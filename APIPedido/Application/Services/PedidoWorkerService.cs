@@ -10,7 +10,7 @@ namespace Application.Services
         private readonly ILogger<PedidoWorkerService> _logger;
         public IServiceProvider Services { get; }
 
-        public PedidoWorkerService(IServiceProvider services, ILogger<PedidoWorkerService> logger) 
+        public PedidoWorkerService(IServiceProvider services, ILogger<PedidoWorkerService> logger)
         {
             Services = services;
             _logger = logger;

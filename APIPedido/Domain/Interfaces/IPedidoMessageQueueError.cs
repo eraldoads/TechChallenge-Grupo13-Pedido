@@ -1,6 +1,6 @@
 ﻿namespace Domain.Interfaces
 {
-    public interface IPedidoMessageQueue
+    public interface IPedidoMessageQueueError
     {
         event Func<string, Task> MessageReceived;
         Task StartListening();

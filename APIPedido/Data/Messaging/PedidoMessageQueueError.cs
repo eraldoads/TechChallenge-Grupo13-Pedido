@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Data.Messaging
 {
-    public class PedidoMessageQueue : IPedidoMessageQueue, IDisposable
+    public class PedidoMessageQueueError : IPedidoMessageQueueError, IDisposable
     {
         private readonly ILogger<PedidoMessageQueue> _logger;
         private IConnection _connection;
@@ -22,7 +22,7 @@ namespace Data.Messaging
 
         public event Func<string, Task> MessageReceived;
 
-        public PedidoMessageQueue(ILogger<PedidoMessageQueue> logger)
+        public PedidoMessageQueueError(ILogger<PedidoMessageQueue> logger)
         {
             _logger = logger;
             ConnectRabbitMQ();
@@ -75,14 +75,14 @@ namespace Data.Messaging
                 }
             };
 
-            _channel.BasicConsume("pagamento_aprovado", false, consumer);
+            _channel.BasicConsume("pagamento_erro", false, consumer);
         }
 
         public void ReenqueueMessage(string message)
         {
             EnsureNotDisposed();
             var body = Encoding.UTF8.GetBytes(message);
-            _channel.BasicPublish("pagamento_aprovado_exchange", "pagamento_aprovado.*", null, body);
+            _channel.BasicPublish("pagamento_erro_exchange", "pagamento_erro.*", null, body);
         }
 
         private void ConnectRabbitMQ()
@@ -98,9 +98,9 @@ namespace Data.Messaging
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 
-            _channel.ExchangeDeclare("pagamento_aprovado_exchange", ExchangeType.Direct);
-            _channel.QueueDeclare("pagamento_aprovado", false, false, false, null);
-            _channel.QueueBind("pagamento_aprovado", "pagamento_aprovado_exchange", "pagamento_aprovado.*", null);
+            _channel.ExchangeDeclare("pagamento_erro_exchange", ExchangeType.Direct);
+            _channel.QueueDeclare("pagamento_erro", false, false, false, null);
+            _channel.QueueBind("pagamento_erro", "pagamento_erro_exchange", "pagamento_erro.*", null);
             _channel.BasicQos(0, 1, false);
 
             _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;

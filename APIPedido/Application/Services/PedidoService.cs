@@ -4,21 +4,25 @@ using Domain.Entities.Output;
 using Domain.EntitiesDTO;
 using Domain.Interfaces;
 using Domain.ValueObjects;
+using Newtonsoft.Json;
+using System.Transactions;
 
 namespace Application.Interfaces
 {
     public class PedidoService : DateTimeAdjuster, IPedidoService
     {
         private readonly IPedidoRepository _pedidoRepository;
+        private readonly IPedidoMessageSender _pedidoMessageSender;
 
         /// <summary>
         /// Construtor para a classe PedidoService.
         /// </summary>
         /// <param name="pedidoRepository">O repositório de pedidos a ser usado pela classe PedidoService.</param>
         /// <param name="produtoService">O serviço de produtos a ser usado pela classe PedidoService.</param>
-        public PedidoService(IPedidoRepository pedidoRepository)
+        public PedidoService(IPedidoRepository pedidoRepository, IPedidoMessageSender pedidoMessageSender)
         {
             _pedidoRepository = pedidoRepository;
+            _pedidoMessageSender = pedidoMessageSender;
         }
 
         /// <summary>
@@ -77,14 +81,25 @@ namespace Application.Interfaces
             //    throw new PreconditionFailedException($"Cliente com ID {novoPedido.IdCliente} não existe. Operação cancelada", nameof(novoPedido.IdCliente));
             //}
 
-            var novoPedidoCriado = await _pedidoRepository.PostPedido(novoPedido);
-
-            return new PedidoDTO
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                IdPedido = novoPedidoCriado.IdPedido,
-                DataPedido = novoPedidoCriado.DataPedido,
-                ValorTotal = novoPedidoCriado.ValorTotal
-            };
+
+                var novoPedidoCriado = await _pedidoRepository.PostPedido(novoPedido);
+
+                PedidoDTO pedido = new PedidoDTO
+                {
+                    IdPedido = novoPedidoCriado.IdPedido,
+                    DataPedido = novoPedidoCriado.DataPedido,
+                    ValorTotal = novoPedidoCriado.ValorTotal
+                };
+
+                string message = JsonConvert.SerializeObject(pedido);
+                _pedidoMessageSender.SendMessage("novo_pedido", message);
+
+                scope.Complete();
+
+                return pedido;
+            }
         }
 
         /// <summary>
