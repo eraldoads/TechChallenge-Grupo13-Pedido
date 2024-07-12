@@ -2,19 +2,22 @@
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
+using System;
 using System.Collections.Concurrent;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Data.Messaging
 {
     public class PedidoMessageQueueError : IPedidoMessageQueueError, IDisposable
     {
-        private readonly ILogger<PedidoMessageQueue> _logger;
+        private readonly ILogger<PedidoMessageQueueError> _logger;
         private IConnection _connection;
         private IModel _channel;
         private bool _disposed = false;
 
-        private readonly string _hostname = Environment.GetEnvironmentVariable("RABBIT_HOSTNAME");
+        private readonly string _hostname = "b-2e3cc774-1b4b-430c-aeb6-e56fbd0bdcff.mq.us-east-1.amazonaws.com";
         private readonly string _username = Environment.GetEnvironmentVariable("RABBIT_USERNAME");
         private readonly string _password = Environment.GetEnvironmentVariable("RABBIT_PASSWORD");
 
@@ -22,7 +25,7 @@ namespace Data.Messaging
 
         public event Func<string, Task> MessageReceived;
 
-        public PedidoMessageQueueError(ILogger<PedidoMessageQueue> logger)
+        public PedidoMessageQueueError(ILogger<PedidoMessageQueueError> logger)
         {
             _logger = logger;
             ConnectRabbitMQ();
@@ -92,30 +95,55 @@ namespace Data.Messaging
                 HostName = _hostname,
                 UserName = _username,
                 Password = _password,
-                DispatchConsumersAsync = true
+                Port = 5671, // Porta para SSL
+                Ssl = new SslOption
+                {
+                    Enabled = true,
+                    ServerName = _hostname, // Ou o nome do servidor conforme certificado
+                    Version = System.Security.Authentication.SslProtocols.Tls12 // Certifique-se de que a versão TLS é suportada pelo seu servidor
+                },
+                DispatchConsumersAsync = true,
+                RequestedConnectionTimeout = TimeSpan.FromSeconds(60), // Timeout de conexão
+                SocketReadTimeout = TimeSpan.FromSeconds(60), // Timeout de leitura
+                SocketWriteTimeout = TimeSpan.FromSeconds(60) // Timeout de escrita
             };
 
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            try
+            {
+                _connection = factory.CreateConnection();
+                _channel = _connection.CreateModel();
 
-            _channel.ExchangeDeclare("pagamento_erro_exchange", ExchangeType.Direct);
-            _channel.QueueDeclare("pagamento_erro", false, false, false, null);
-            _channel.QueueBind("pagamento_erro", "pagamento_erro_exchange", "pagamento_erro.*", null);
-            _channel.BasicQos(0, 1, false);
+                _channel.ExchangeDeclare("pagamento_erro_exchange", ExchangeType.Direct);
+                _channel.QueueDeclare("pagamento_erro", false, false, false, null);
+                _channel.QueueBind("pagamento_erro", "pagamento_erro_exchange", "pagamento_erro.*", null);
+                _channel.BasicQos(0, 1, false);
 
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
+                _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
+
+                _logger.LogInformation("Conectado ao RabbitMQ");
+            }
+            catch (BrokerUnreachableException ex)
+            {
+                _logger.LogError(ex, "Não foi possível alcançar o broker");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ocorreu um erro ao tentar conectar ao RabbitMQ");
+                throw;
+            }
         }
 
         private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            _logger.LogInformation("RabbitMQ connection shutdown.");
+            _logger.LogInformation("Conexão RabbitMQ encerrada.");
         }
 
         private void EnsureNotDisposed()
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(PedidoMessageQueue));
+                throw new ObjectDisposedException(nameof(PedidoMessageQueueError));
             }
         }
 
