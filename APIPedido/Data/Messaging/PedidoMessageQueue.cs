@@ -3,10 +3,8 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using System;
 using System.Collections.Concurrent;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Data.Messaging
 {
@@ -17,9 +15,11 @@ namespace Data.Messaging
         private IModel _channel;
         private bool _disposed = false;
 
-        private readonly string _hostname = "b-2e3cc774-1b4b-430c-aeb6-e56fbd0bdcff.mq.us-east-1.amazonaws.com";
+        private readonly string _hostname = Environment.GetEnvironmentVariable("RABBIT_HOSTNAME");
         private readonly string _username = Environment.GetEnvironmentVariable("RABBIT_USERNAME");
         private readonly string _password = Environment.GetEnvironmentVariable("RABBIT_PASSWORD");
+        private readonly Int16 _qtdeRetryPagamento = Convert.ToInt16(Environment.GetEnvironmentVariable("QTDE_RETRY_PAGAMENTO"));
+
 
         private ConcurrentDictionary<string, int> _retryCountDictionary = new ConcurrentDictionary<string, int>();
 
@@ -55,7 +55,7 @@ namespace Data.Messaging
 
                     if (_retryCountDictionary.TryGetValue(content, out int retryCount))
                     {
-                        if (retryCount < 3) // Máximo de tentativas
+                        if (retryCount < _qtdeRetryPagamento) // Máximo de tentativas
                         {
                             _retryCountDictionary.AddOrUpdate(content, 1, (key, oldValue) => oldValue + 1);
                             // Rejeita e reenfileira a mensagem
@@ -99,8 +99,8 @@ namespace Data.Messaging
                 Ssl = new SslOption
                 {
                     Enabled = true,
-                    ServerName = _hostname, // Ou o nome do servidor conforme certificado
-                    Version = System.Security.Authentication.SslProtocols.Tls12 // Certifique-se de que a versão TLS é suportada pelo seu servidor
+                    ServerName = _hostname, 
+                    Version = System.Security.Authentication.SslProtocols.Tls12
                 },
                 DispatchConsumersAsync = true,
                 RequestedConnectionTimeout = TimeSpan.FromSeconds(60), // Timeout de conexão
@@ -129,14 +129,14 @@ namespace Data.Messaging
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ocorreu um erro ao tentar conectar ao RabbitMQ");
+                _logger.LogError(ex, "Ocorreu um erro ao tentar conectar no RabbitMQ");
                 throw;
             }
         }
 
         private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            _logger.LogInformation("Conexão RabbitMQ encerrada.");
+            _logger.LogInformation("Desconectado do RabbitMQ");
         }
 
         private void EnsureNotDisposed()

@@ -8,7 +8,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "RABBIT_HOSTNAME": "b-2e3cc774-1b4b-430c-aeb6-e56fbd0bdcff.mq.us-east-1.amazonaws.com",
         "RABBIT_USERNAME": "piklesrabbit",
-        "RABBIT_PASSWORD": "Fast.FoodRabbitMQ"
+        "RABBIT_PASSWORD": "Fast.FoodRabbitMQ",
+        "QTDE_RETRY_PAGAMENTO": "10"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5008"
