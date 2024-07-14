@@ -35,6 +35,16 @@ O microsserviço Pedido fica lendo continuamente a fila <b>pagamento_erro</b> e 
 
 Caso o pagamento seja rejeitado pelo Mercado Pago, o cliente receberá a notificação no aplicativo e poderá alterar a forma de pagamento. Enquanto o pagamento não for aprovado, o pedido continuará com status <b>Recebido</b> e o pagamento com status <b>Pendente</b>.
 
+## Escaneamento de vulnerabilidades - OWASP ZAP
+
+Na fase 5, realizamos o escaneamento utilizando a ferramenta OWASP ZAP para identificarmos e tratarmos possíveis vulnerabilidades.
+
+![image](https://github.com/user-attachments/assets/329c2c51-3ff6-481f-9683-d329728ea963)
+
+Não foram encontradas vulnerabilidades médias ou altas, portanto, não foi necessário o tratamento.
+
+O relatório OWASP-ZAP-Realização do Pedido (Checkout).pdf encontra-se na raíz desse projeto.
+
 ## Arquitetura
 Na fase 5, adicionamos o RabbitMQ como broker de mensageria para implementarmos o padrão SAGA. 
 
