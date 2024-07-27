@@ -21,7 +21,8 @@ Também em uma transação atômica, o microsserviço de Pagamento lê a mensage
 
 Após o cliente realizar o processo de pagamento via Mercado Pago, o endpoint de webhook do microsserviço Pagamento recebe a notificação do Mercado Pago e atualiza o status do pagamento no MongoDB. Se aprovado, o status do pagamento é atualizado para <b>Aprovado</b> e uma mensagem é publicada na fila <b>pagamento_aprovado</b> para que o microsserviço de Pedido dê andamento ao processo atualizando o status do pedido para <b>Em preparação</b>.
 
-![image](https://github.com/user-attachments/assets/c1885508-c5c3-46e9-86b6-22a309781401)
+![image](https://github.com/user-attachments/assets/e3a3aac2-b45e-4061-8254-91328731283b)
+
 
 Abaixo, temos o trecho de código no qual o microsserviço Pedido grava um novo pedido no MySQL e insere uma mensagem na fila <b>novo_pedido</b> em uma transação:
 
