@@ -6,7 +6,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "RABBIT_HOSTNAME": "b-2e3cc774-1b4b-430c-aeb6-e56fbd0bdcff.mq.us-east-1.amazonaws.com",
+        "RABBIT_HOSTNAME": "b-9b24d74e-a3dc-43e6-8a87-0bbba54782a8.mq.us-east-1.amazonaws.com",
         "RABBIT_USERNAME": "piklesrabbit",
         "RABBIT_PASSWORD": "Fast.FoodRabbitMQ",
         "QTDE_RETRY_PAGAMENTO": "10"
