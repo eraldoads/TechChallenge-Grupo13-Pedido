@@ -56,7 +56,7 @@ builder.Services.AddSwaggerGen(c =>
     c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Tech Challenge - Grupo 13 - Fase II",
+        Title = "Tech Challenge - Grupo 13 - Fase V",
         Description = "Documentação dos endpoints da API.",
         Contact = new OpenApiContact { Name = "Tech Challenge - Grupo 13", Email = "grupo13@fiap.com" },
         License = new OpenApiLicense { Name = "MIT License", Url = new Uri("https://opensource.org/licenses/MIT") },
