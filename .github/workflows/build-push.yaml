@@ -3,7 +3,8 @@ name: Build and Push to ECR
 on:
   push:
     branches:
-      - develop
+      - main
+      - homolog
 
 jobs:
   build:
